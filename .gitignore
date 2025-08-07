@@ -1,0 +1,40 @@
+# Laravel & Composer
+/vendor
+/node_modules
+/public/storage
+/storage/*.key
+.env
+.env.*
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+/.vagrant
+
+# Laravel 5 & 6 specific
+/storage/app/public
+/storage/framework/cache/data
+/storage/logs
+/storage/framework/sessions
+/storage/framework/views
+
+# Laravel IDE Helper
+/_ide_helper.php
+/_ide_helper_models.php
+/.phpstorm.meta.php
+
+# Laravel Mix
+/public/hot
+/public/storage
+/public/mix-manifest.json
+
+# NPM
+npm-debug.log
+yarn-error.log
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Vite
+/vite.svg
+/vite-manifest.json
