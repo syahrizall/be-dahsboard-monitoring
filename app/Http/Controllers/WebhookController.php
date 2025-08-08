@@ -30,10 +30,12 @@ class WebhookController extends Controller
             // Ambil data dari RADIUS webhook
             $data = $request->all();
 
+            $success = filter_var($data['success'], FILTER_VALIDATE_BOOLEAN);
+
             $loginLog = $this->loginLogService->createLoginLog([
                 'username' => $data['username'] ?? 'unknown',
                 'ip_address' => $data['ip_address'] ?? $request->ip(),
-                'success' => $data['success'] ?? false,
+                'success' => $success ?? false,
                 'raw_payload' => $data,
             ]);
 
