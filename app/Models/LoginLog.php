@@ -6,14 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class LoginLog extends Model
 {
-    // protected $fillable = [
-    //     'username',
-    //     'ip_address',
-    //     'success',
-    //     'raw_payload',
-    // ];
-
-    protected $guarded = [];
+    protected $fillable = [
+        'username',
+        'ip_address',
+        'success',
+        'raw_payload',
+    ];
     
     protected $casts = [
         'raw_payload' => 'array',

@@ -1,61 +1,132 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# POLRI Backend - Dashboard Monitoring
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Backend API untuk sistem monitoring dashboard POLRI yang menangani log login dan statistik pengguna.
 
-## About Laravel
+## 🚀 Fitur
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Webhook Receiver**: Menerima data login dari sistem RADIUS
+- **Statistics API**: Endpoint untuk mendapatkan statistik login
+- **Rate Limiting**: Proteksi API dari abuse
+- **Error Handling**: Penanganan error yang konsisten
+- **Service Layer**: Arsitektur yang bersih dan maintainable
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📋 Requirements
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 8.2+
+- Laravel 12
+- SQLite/MySQL/PostgreSQL
 
-## Learning Laravel
+## 🛠️ Installation
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+1. Clone repository
+```bash
+git clone <repository-url>
+cd polri-be
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+2. Install dependencies
+```bash
+composer install
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+3. Setup environment
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-## Laravel Sponsors
+4. Configure database di `.env`
+```env
+DB_CONNECTION=sqlite
+DB_DATABASE=database/database.sqlite
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+5. Run migrations
+```bash
+php artisan migrate
+```
 
-### Premium Partners
+6. Start server
+```bash
+php artisan serve
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## 📡 API Endpoints
 
-## Contributing
+### Webhook
+- `POST /api/webhook` - Menerima data login dari RADIUS
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Statistics
+- `GET /api/stats/active-users` - Pengguna aktif (15 menit terakhir)
+- `GET /api/stats/unique-users` - Jumlah pengguna unik
+- `GET /api/stats/list-unique-users` - Daftar pengguna unik
+- `GET /api/stats/last-login` - Data login terakhir per pengguna
+- `GET /api/stats/success-logins` - Jumlah login berhasil
+- `GET /api/stats/failed-logins` - Jumlah login gagal
+- `GET /api/stats/logins-by-date?from=2024-01-01&to=2024-01-31` - Statistik login per tanggal
 
-## Code of Conduct
+## 🔒 Security
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- Rate limiting: 30 requests/minute untuk webhook, 60 requests/minute untuk stats
+- Input validation untuk semua endpoint
+- Error handling yang aman
+- Logging untuk monitoring
 
-## Security Vulnerabilities
+## 🏗️ Architecture
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```
+app/
+├── Http/
+│   ├── Controllers/
+│   │   ├── StatsController.php
+│   │   └── WebhookController.php
+│   └── Middleware/
+│       └── RateLimitMiddleware.php
+├── Models/
+│   ├── LoginLog.php
+│   └── User.php
+├── Services/
+│   └── LoginLogService.php
+└── Exceptions/
+    └── Handler.php
+```
 
-## License
+## 📊 Database Schema
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### login_logs
+- `id` - Primary key
+- `username` - Username pengguna
+- `ip_address` - IP address
+- `success` - Status login (true/false)
+- `raw_payload` - Data mentah dari webhook
+- `created_at` - Timestamp login
+- `updated_at` - Timestamp update
+
+## 🧪 Testing
+
+```bash
+php artisan test
+```
+
+## 📝 Logging
+
+Logs tersimpan di `storage/logs/laravel.log` dengan format:
+- Info: Login berhasil dibuat
+- Warning: Validasi webhook gagal
+- Error: Error processing webhook atau stats
+
+## 🔧 Development
+
+```bash
+# Development dengan hot reload
+composer run dev
+
+# Clear cache
+php artisan config:clear
+php artisan route:clear
+php artisan cache:clear
+```
+
+## 📄 License
+
+MIT License
