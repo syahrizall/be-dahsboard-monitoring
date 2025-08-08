@@ -4,6 +4,7 @@ Backend API untuk sistem monitoring dashboard POLRI yang menangani log login dan
 
 ## 🚀 Fitur
 
+- **Authentication**: Login/logout dengan token-based authentication
 - **Webhook Receiver**: Menerima data login dari sistem RADIUS
 - **Statistics API**: Endpoint untuk mendapatkan statistik login
 - **Rate Limiting**: Proteksi API dari abuse
@@ -46,27 +47,81 @@ DB_DATABASE=database/database.sqlite
 php artisan migrate
 ```
 
-6. Start server
+6. Seed database (membuat user default)
+```bash
+php artisan db:seed
+```
+
+7. Start server
 ```bash
 php artisan serve
 ```
 
+## 🔐 Authentication
+
+### Default User
+- **Email**: `admin@polri.com`
+- **Password**: `password123`
+
+### Login
+```bash
+POST /api/login
+Content-Type: application/json
+
+{
+    "email": "admin@polri.com",
+    "password": "password123"
+}
+```
+
+Response:
+```json
+{
+    "status": "success",
+    "message": "Login successful",
+    "user": {
+        "id": 1,
+        "name": "Admin",
+        "email": "admin@polri.com"
+    },
+    "token": "1|abc123..."
+}
+```
+
+### Logout
+```bash
+POST /api/logout
+Authorization: Bearer {token}
+```
+
+### Get Current User
+```bash
+GET /api/me
+Authorization: Bearer {token}
+```
+
 ## 📡 API Endpoints
+
+### Authentication
+- `POST /api/login` - Login user
+- `POST /api/logout` - Logout user (protected)
+- `GET /api/me` - Get current user (protected)
 
 ### Webhook
 - `POST /api/webhook` - Menerima data login dari RADIUS
 
 ### Statistics
-- `GET /api/stats/active-users` - Pengguna aktif (15 menit terakhir)
-- `GET /api/stats/unique-users` - Jumlah pengguna unik
-- `GET /api/stats/list-unique-users` - Daftar pengguna unik
-- `GET /api/stats/last-login` - Data login terakhir per pengguna
-- `GET /api/stats/success-logins` - Jumlah login berhasil
-- `GET /api/stats/failed-logins` - Jumlah login gagal
-- `GET /api/stats/logins-by-date?from=2024-01-01&to=2024-01-31` - Statistik login per tanggal
+- `GET /api/stats/active-users` - Pengguna aktif (15 menit terakhir) (protected)
+- `GET /api/stats/unique-users` - Jumlah pengguna unik (protected)
+- `GET /api/stats/list-unique-users` - Daftar pengguna unik (protected)
+- `GET /api/stats/last-login` - Data login terakhir per pengguna (protected)
+- `GET /api/stats/success-logins` - Jumlah login berhasil (protected)
+- `GET /api/stats/failed-logins` - Jumlah login gagal (protected)
+- `GET /api/stats/logins-by-date?from=2024-01-01&to=2024-01-31` - Statistik login per tanggal (protected)
 
 ## 🔒 Security
 
+- Token-based authentication dengan Laravel Sanctum
 - Rate limiting: 30 requests/minute untuk webhook, 60 requests/minute untuk stats
 - Input validation untuk semua endpoint
 - Error handling yang aman
@@ -78,6 +133,7 @@ php artisan serve
 app/
 ├── Http/
 │   ├── Controllers/
+│   │   ├── AuthController.php
 │   │   ├── StatsController.php
 │   │   └── WebhookController.php
 │   └── Middleware/
@@ -85,48 +141,64 @@ app/
 ├── Models/
 │   ├── LoginLog.php
 │   └── User.php
-├── Services/
-│   └── LoginLogService.php
-└── Exceptions/
-    └── Handler.php
+└── Services/
+    └── LoginLogService.php
 ```
 
 ## 📊 Database Schema
 
+### users
+- `id` - Primary key
+- `name` - Nama user
+- `email` - Email user (unique)
+- `password` - Password (hashed)
+- `email_verified_at` - Timestamp verifikasi email
+- `remember_token` - Token untuk remember me
+- `created_at` - Timestamp pembuatan
+- `updated_at` - Timestamp update
+
 ### login_logs
 - `id` - Primary key
-- `username` - Username pengguna
-- `ip_address` - IP address
+- `username` - Username dari RADIUS
+- `ip_address` - IP address login
 - `success` - Status login (true/false)
-- `raw_payload` - Data mentah dari webhook
+- `raw_payload` - Data mentah dari RADIUS
 - `created_at` - Timestamp login
-- `updated_at` - Timestamp update
+
+### personal_access_tokens
+- `id` - Primary key
+- `tokenable_type` - Model type
+- `tokenable_id` - Model ID
+- `name` - Token name
+- `token` - Hashed token
+- `abilities` - Token abilities
+- `last_used_at` - Last used timestamp
+- `expires_at` - Expiration timestamp
+- `created_at` - Created timestamp
+- `updated_at` - Updated timestamp
 
 ## 🧪 Testing
 
+### Login Test
 ```bash
-php artisan test
+curl -X POST http://localhost:8000/api/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@polri.com",
+    "password": "password123"
+  }'
 ```
 
-## 📝 Logging
-
-Logs tersimpan di `storage/logs/laravel.log` dengan format:
-- Info: Login berhasil dibuat
-- Warning: Validasi webhook gagal
-- Error: Error processing webhook atau stats
-
-## 🔧 Development
-
+### Protected Route Test
 ```bash
-# Development dengan hot reload
-composer run dev
-
-# Clear cache
-php artisan config:clear
-php artisan route:clear
-php artisan cache:clear
+curl -X GET http://localhost:8000/api/me \
+  -H "Authorization: Bearer {token}"
 ```
 
-## 📄 License
+## 📝 Notes
 
-MIT License
+- Sistem ini menggunakan Laravel Sanctum untuk token-based authentication
+- Hanya ada satu user default (admin@polri.com)
+- Token akan expired sesuai konfigurasi Sanctum
+- Semua endpoint stats memerlukan authentication (protected)
+- Endpoint webhook tidak memerlukan authentication (untuk sistem RADIUS)

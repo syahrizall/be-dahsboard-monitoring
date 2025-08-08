@@ -3,11 +3,21 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\AuthController;
+
+// Authentication routes
+Route::post('/login', [AuthController::class, 'login']);
+
+// Protected routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/me', [AuthController::class, 'me']);
+});
 
 Route::post('/webhook', [WebhookController::class, 'receive'])
     ->middleware('rate.limit:30'); // 30 requests per minute for webhook
 
-Route::prefix('stats')->group(function () {
+Route::middleware('auth:sanctum')->prefix('stats')->group(function () {
     Route::get('/active-users', [StatsController::class, 'activeUsers'])
         ->middleware('rate.limit:60');
     Route::get('/unique-users', [StatsController::class, 'uniqueUsers'])

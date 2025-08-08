@@ -8,6 +8,115 @@
 	},
 	"item": [
 		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "POST Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const res = pm.response.json();",
+									"if (res && res.token) {",
+									"  pm.environment.set('token', res.token);",
+									"}",
+									"pm.test(\"Token exists\", function () {",
+									"  pm.expect(res).to.have.property('token');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@polri.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "login"]
+						},
+						"description": "Login untuk mendapatkan Bearer token. Token akan otomatis disimpan ke environment variable `token`."
+					},
+					"response": []
+				},
+				{
+					"name": "GET Me",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Has user object\", function () {",
+									"  const res = pm.response.json();",
+									"  pm.expect(res).to.have.property('user');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/me",
+							"host": ["{{base_url}}"],
+							"path": ["api", "me"]
+						},
+						"description": "Mendapatkan user saat ini (protected)"
+					},
+					"response": []
+				},
+				{
+					"name": "POST Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/logout",
+							"host": ["{{base_url}}"],
+							"path": ["api", "logout"]
+						},
+						"description": "Logout dan revoke token (protected)"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoint authentication (Sanctum)"
+		},
+		{
 			"name": "Webhook",
 			"item": [
 				{
@@ -18,24 +127,24 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
-									"    pm.response.to.have.status(201);",
+									"  pm.response.to.have.status(201);",
 									"});",
 									"",
 									"pm.test(\"Response has correct structure\", function () {",
-									"    const response = pm.response.json();",
-									"    pm.expect(response).to.have.property('status');",
-									"    pm.expect(response).to.have.property('message');",
-									"    pm.expect(response).to.have.property('data');",
-									"    pm.expect(response.status).to.eql('success');",
+									"  const response = pm.response.json();",
+									"  pm.expect(response).to.have.property('status');",
+									"  pm.expect(response).to.have.property('message');",
+									"  pm.expect(response).to.have.property('data');",
+									"  pm.expect(response.status).to.eql('success');",
 									"});",
 									"",
 									"pm.test(\"Data contains required fields\", function () {",
-									"    const response = pm.response.json();",
-									"    const data = response.data;",
-									"    pm.expect(data).to.have.property('username');",
-									"    pm.expect(data).to.have.property('success');",
-									"    pm.expect(data).to.have.property('ip_address');",
-									"    pm.expect(data).to.have.property('raw_payload');",
+									"  const response = pm.response.json();",
+									"  const data = response.data;",
+									"  pm.expect(data).to.have.property('username');",
+									"  pm.expect(data).to.have.property('success');",
+									"  pm.expect(data).to.have.property('ip_address');",
+									"  pm.expect(data).to.have.property('raw_payload');",
 									"});"
 								],
 								"type": "text/javascript"
@@ -45,24 +154,16 @@
 					"request": {
 						"method": "POST",
 						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
+							{ "key": "Content-Type", "value": "application/json" }
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"john.doe\",\n    \"success\": true,\n    \"ip_address\": \"192.168.1.100\"\n}"
+							"raw": "{\n  \"username\": \"john.doe\",\n  \"success\": true,\n  \"ip_address\": \"192.168.1.100\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/webhook",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"webhook"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["api", "webhook"]
 						},
 						"description": "Mengirim data login berhasil ke webhook endpoint"
 					},
@@ -76,12 +177,12 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
-									"    pm.response.to.have.status(201);",
+									"  pm.response.to.have.status(201);",
 									"});",
 									"",
 									"pm.test(\"Success field is false\", function () {",
-									"    const response = pm.response.json();",
-									"    pm.expect(response.data.success).to.eql(false);",
+									"  const response = pm.response.json();",
+									"  pm.expect(response.data.success).to.eql(false);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -91,24 +192,16 @@
 					"request": {
 						"method": "POST",
 						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
+							{ "key": "Content-Type", "value": "application/json" }
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"john.doe\",\n    \"success\": false,\n    \"ip_address\": \"192.168.1.100\"\n}"
+							"raw": "{\n  \"username\": \"john.doe\",\n  \"success\": false,\n  \"ip_address\": \"192.168.1.100\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/webhook",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"webhook"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["api", "webhook"]
 						},
 						"description": "Mengirim data login gagal ke webhook endpoint"
 					},
@@ -122,7 +215,7 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
-									"    pm.response.to.have.status(201);",
+									"  pm.response.to.have.status(201);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -132,24 +225,16 @@
 					"request": {
 						"method": "POST",
 						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
+							{ "key": "Content-Type", "value": "application/json" }
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"jane.smith\",\n    \"success\": true\n}"
+							"raw": "{\n  \"username\": \"jane.smith\",\n  \"success\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/webhook",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"webhook"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["api", "webhook"]
 						},
 						"description": "Mengirim data minimal (hanya username dan success)"
 					},
@@ -163,15 +248,15 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Status code is 422\", function () {",
-									"    pm.response.to.have.status(422);",
+									"  pm.response.to.have.status(422);",
 									"});",
 									"",
 									"pm.test(\"Error response structure\", function () {",
-									"    const response = pm.response.json();",
-									"    pm.expect(response).to.have.property('status');",
-									"    pm.expect(response).to.have.property('message');",
-									"    pm.expect(response).to.have.property('errors');",
-									"    pm.expect(response.status).to.eql('error');",
+									"  const response = pm.response.json();",
+									"  pm.expect(response).to.have.property('status');",
+									"  pm.expect(response).to.have.property('message');",
+									"  pm.expect(response).to.have.property('errors');",
+									"  pm.expect(response.status).to.eql('error');",
 									"});"
 								],
 								"type": "text/javascript"
@@ -181,24 +266,13 @@
 					"request": {
 						"method": "POST",
 						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
+							{ "key": "Content-Type", "value": "application/json" }
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{}"
-						},
+						"body": { "mode": "raw", "raw": "{}" },
 						"url": {
 							"raw": "{{base_url}}/api/webhook",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"webhook"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["api", "webhook"]
 						},
 						"description": "Test validasi dengan data kosong"
 					},
@@ -212,7 +286,7 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Status code is 422\", function () {",
-									"    pm.response.to.have.status(422);",
+									"  pm.response.to.have.status(422);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -222,24 +296,13 @@
 					"request": {
 						"method": "POST",
 						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
+							{ "key": "Content-Type", "value": "application/json" }
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"username\": 123,\n    \"success\": \"true\"\n}"
-						},
+						"body": { "mode": "raw", "raw": "{\n  \"username\": 123,\n  \"success\": \"true\"\n}" },
 						"url": {
 							"raw": "{{base_url}}/api/webhook",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"webhook"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["api", "webhook"]
 						},
 						"description": "Test validasi dengan tipe data yang salah"
 					},
@@ -259,13 +322,13 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
+									"  pm.response.to.have.status(200);",
 									"});",
 									"",
 									"pm.test(\"Response has active_users field\", function () {",
-									"    const response = pm.response.json();",
-									"    pm.expect(response).to.have.property('active_users');",
-									"    pm.expect(response.active_users).to.be.an('array');",
+									"  const response = pm.response.json();",
+									"  pm.expect(response).to.have.property('active_users');",
+									"  pm.expect(response.active_users).to.be.an('array');",
 									"});"
 								],
 								"type": "text/javascript"
@@ -274,17 +337,13 @@
 					],
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
 						"url": {
 							"raw": "{{base_url}}/api/stats/active-users",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"stats",
-								"active-users"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["api", "stats", "active-users"]
 						},
 						"description": "Mendapatkan daftar pengguna aktif (login dalam 15 menit terakhir)"
 					},
@@ -298,13 +357,13 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
+									"  pm.response.to.have.status(200);",
 									"});",
 									"",
 									"pm.test(\"Response has unique_users field\", function () {",
-									"    const response = pm.response.json();",
-									"    pm.expect(response).to.have.property('unique_users');",
-									"    pm.expect(response.unique_users).to.be.a('number');",
+									"  const response = pm.response.json();",
+									"  pm.expect(response).to.have.property('unique_users');",
+									"  pm.expect(response.unique_users).to.be.a('number');",
 									"});"
 								],
 								"type": "text/javascript"
@@ -313,17 +372,13 @@
 					],
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
 						"url": {
 							"raw": "{{base_url}}/api/stats/unique-users",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"stats",
-								"unique-users"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["api", "stats", "unique-users"]
 						},
 						"description": "Mendapatkan jumlah pengguna unik yang pernah login"
 					},
@@ -337,12 +392,12 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
+									"  pm.response.to.have.status(200);",
 									"});",
 									"",
 									"pm.test(\"Response is an array\", function () {",
-									"    const response = pm.response.json();",
-									"    pm.expect(response).to.be.an('array');",
+									"  const response = pm.response.json();",
+									"  pm.expect(response).to.be.an('array');",
 									"});"
 								],
 								"type": "text/javascript"
@@ -351,17 +406,13 @@
 					],
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
 						"url": {
 							"raw": "{{base_url}}/api/stats/list-unique-users",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"stats",
-								"list-unique-users"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["api", "stats", "list-unique-users"]
 						},
 						"description": "Mendapatkan daftar lengkap pengguna unik"
 					},
@@ -375,12 +426,12 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
+									"  pm.response.to.have.status(200);",
 									"});",
 									"",
 									"pm.test(\"Response is an array\", function () {",
-									"    const response = pm.response.json();",
-									"    pm.expect(response).to.be.an('array');",
+									"  const response = pm.response.json();",
+									"  pm.expect(response).to.be.an('array');",
 									"});"
 								],
 								"type": "text/javascript"
@@ -389,17 +440,13 @@
 					],
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
 						"url": {
 							"raw": "{{base_url}}/api/stats/last-login",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"stats",
-								"last-login"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["api", "stats", "last-login"]
 						},
 						"description": "Mendapatkan data login terakhir untuk setiap pengguna"
 					},
@@ -413,13 +460,13 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
+									"  pm.response.to.have.status(200);",
 									"});",
 									"",
 									"pm.test(\"Response has success_logins field\", function () {",
-									"    const response = pm.response.json();",
-									"    pm.expect(response).to.have.property('success_logins');",
-									"    pm.expect(response.success_logins).to.be.a('number');",
+									"  const response = pm.response.json();",
+									"  pm.expect(response).to.have.property('success_logins');",
+									"  pm.expect(response.success_logins).to.be.a('number');",
 									"});"
 								],
 								"type": "text/javascript"
@@ -428,17 +475,13 @@
 					],
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
 						"url": {
 							"raw": "{{base_url}}/api/stats/success-logins",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"stats",
-								"success-logins"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["api", "stats", "success-logins"]
 						},
 						"description": "Mendapatkan jumlah login berhasil"
 					},
@@ -452,13 +495,13 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
+									"  pm.response.to.have.status(200);",
 									"});",
 									"",
 									"pm.test(\"Response has failed_logins field\", function () {",
-									"    const response = pm.response.json();",
-									"    pm.expect(response).to.have.property('failed_logins');",
-									"    pm.expect(response.failed_logins).to.be.a('number');",
+									"  const response = pm.response.json();",
+									"  pm.expect(response).to.have.property('failed_logins');",
+									"  pm.expect(response.failed_logins).to.be.a('number');",
 									"});"
 								],
 								"type": "text/javascript"
@@ -467,17 +510,13 @@
 					],
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
 						"url": {
 							"raw": "{{base_url}}/api/stats/failed-logins",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"stats",
-								"failed-logins"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["api", "stats", "failed-logins"]
 						},
 						"description": "Mendapatkan jumlah login gagal"
 					},
@@ -491,12 +530,12 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
+									"  pm.response.to.have.status(200);",
 									"});",
 									"",
 									"pm.test(\"Response is an array\", function () {",
-									"    const response = pm.response.json();",
-									"    pm.expect(response).to.be.an('array');",
+									"  const response = pm.response.json();",
+									"  pm.expect(response).to.be.an('array');",
 									"});"
 								],
 								"type": "text/javascript"
@@ -505,26 +544,16 @@
 					],
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
 						"url": {
 							"raw": "{{base_url}}/api/stats/logins-by-date?from=2024-01-01&to=2024-01-31",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"stats",
-								"logins-by-date"
-							],
+							"host": ["{{base_url}}"],
+							"path": ["api", "stats", "logins-by-date"],
 							"query": [
-								{
-									"key": "from",
-									"value": "2024-01-01"
-								},
-								{
-									"key": "to",
-									"value": "2024-01-31"
-								}
+								{ "key": "from", "value": "2024-01-01" },
+								{ "key": "to", "value": "2024-01-31" }
 							]
 						},
 						"description": "Mendapatkan statistik login berdasarkan rentang tanggal"
@@ -539,13 +568,13 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Status code is 422\", function () {",
-									"    pm.response.to.have.status(422);",
+									"  pm.response.to.have.status(422);",
 									"});",
 									"",
 									"pm.test(\"Error response structure\", function () {",
-									"    const response = pm.response.json();",
-									"    pm.expect(response).to.have.property('error');",
-									"    pm.expect(response).to.have.property('errors');",
+									"  const response = pm.response.json();",
+									"  pm.expect(response).to.have.property('error');",
+									"  pm.expect(response).to.have.property('errors');",
 									"});"
 								],
 								"type": "text/javascript"
@@ -554,24 +583,20 @@
 					],
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
 						"url": {
 							"raw": "{{base_url}}/api/stats/logins-by-date",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"stats",
-								"logins-by-date"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["api", "stats", "logins-by-date"]
 						},
 						"description": "Test validasi tanpa parameter tanggal"
 					},
 					"response": []
 				}
 			],
-			"description": "Endpoint untuk mendapatkan berbagai statistik login"
+			"description": "Endpoint untuk mendapatkan berbagai statistik login (protected)"
 		},
 		{
 			"name": "Health Check",
@@ -584,7 +609,7 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
+									"  pm.response.to.have.status(200);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -596,12 +621,8 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/up",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"up"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["up"]
 						},
 						"description": "Health check endpoint untuk memastikan aplikasi berjalan"
 					},
@@ -614,28 +635,14 @@
 	"event": [
 		{
 			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
+			"script": { "type": "text/javascript", "exec": [""] }
 		},
 		{
 			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
+			"script": { "type": "text/javascript", "exec": [""] }
 		}
 	],
 	"variable": [
-		{
-			"key": "base_url",
-			"value": "http://localhost:8000",
-			"type": "string"
-		}
+		{ "key": "base_url", "value": "http://localhost:8000", "type": "string" }
 	]
 }
