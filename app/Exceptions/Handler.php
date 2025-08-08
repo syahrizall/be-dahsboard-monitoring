@@ -47,7 +47,7 @@ class Handler extends ExceptionHandler
     {
         if ($e instanceof ValidationException) {
             return response()->json([
-                'error' => 'Validation failed',
+                'status' => 'error',
                 'message' => 'The given data was invalid.',
                 'errors' => $e->errors(),
             ], 422);
@@ -55,35 +55,35 @@ class Handler extends ExceptionHandler
 
         if ($e instanceof ModelNotFoundException) {
             return response()->json([
-                'error' => 'Not found',
+                'status' => 'error',
                 'message' => 'The requested resource was not found.',
             ], 404);
         }
 
         if ($e instanceof NotFoundHttpException) {
             return response()->json([
-                'error' => 'Not found',
+                'status' => 'error',
                 'message' => 'The requested endpoint was not found.',
             ], 404);
         }
 
         if ($e instanceof MethodNotAllowedHttpException) {
             return response()->json([
-                'error' => 'Method not allowed',
+                'status' => 'error',
                 'message' => 'The HTTP method is not allowed for this endpoint.',
             ], 405);
         }
 
         if ($e instanceof AuthenticationException) {
             return response()->json([
-                'error' => 'Unauthenticated',
+                'status' => 'error',
                 'message' => 'Authentication is required.',
             ], 401);
         }
 
         // Default error response
         return response()->json([
-            'error' => 'Internal server error',
+            'status' => 'error',
             'message' => config('app.debug') ? $e->getMessage() : 'Something went wrong.',
         ], 500);
     }

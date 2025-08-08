@@ -30,7 +30,7 @@ class StatsApiTest extends TestCase
         $response = $this->get('/api/stats/active-users');
 
         $response->assertStatus(200)
-            ->assertJsonStructure(['active_users']);
+            ->assertJsonStructure(['status', 'data' => ['active_users']]);
     }
 
     public function test_unique_users_endpoint()
@@ -52,7 +52,7 @@ class StatsApiTest extends TestCase
         $response = $this->get('/api/stats/unique-users');
 
         $response->assertStatus(200)
-            ->assertJson(['unique_users' => 2]);
+            ->assertJsonPath('data.unique_users', 2);
     }
 
     public function test_success_logins_endpoint()
@@ -74,7 +74,7 @@ class StatsApiTest extends TestCase
         $response = $this->get('/api/stats/success-logins');
 
         $response->assertStatus(200)
-            ->assertJson(['success_logins' => 1]);
+            ->assertJsonPath('data.success_logins', 1);
     }
 
     public function test_failed_logins_endpoint()
@@ -96,7 +96,7 @@ class StatsApiTest extends TestCase
         $response = $this->get('/api/stats/failed-logins');
 
         $response->assertStatus(200)
-            ->assertJson(['failed_logins' => 1]);
+            ->assertJsonPath('data.failed_logins', 1);
     }
 
     public function test_logins_by_date_endpoint()
@@ -105,7 +105,8 @@ class StatsApiTest extends TestCase
         $response = $this->get('/api/stats/logins-by-date?from=2024-01-01&to=2024-01-31');
 
         $response->assertStatus(200)
-            ->assertJsonStructure(['*' => ['date', 'total']]);
+            ->assertJsonStructure(['status', 'data']);
+        $this->assertIsArray($response->json('data'));
     }
 
     public function test_logins_by_date_validation()
@@ -114,6 +115,6 @@ class StatsApiTest extends TestCase
         $response = $this->get('/api/stats/logins-by-date');
 
         $response->assertStatus(422)
-            ->assertJsonStructure(['error', 'errors']);
+            ->assertJsonStructure(['status', 'message', 'errors']);
     }
 }

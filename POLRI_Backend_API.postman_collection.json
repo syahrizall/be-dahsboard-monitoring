@@ -21,12 +21,13 @@
 									"  pm.response.to.have.status(200);",
 									"});",
 									"",
-									"const res = pm.response.json();",
-									"if (res && res.token) {",
-									"  pm.environment.set('token', res.token);",
+                                    "const res = pm.response.json();",
+                                    "const token = res && res.data && res.data.token;",
+                                    "if (token) {",
+                                    "  pm.environment.set('token', token);",
 									"}",
-									"pm.test(\"Token exists\", function () {",
-									"  pm.expect(res).to.have.property('token');",
+                                    "pm.test(\"Token exists\", function () {",
+                                    "  pm.expect(token).to.be.a('string');",
 									"});"
 								],
 								"type": "text/javascript"
@@ -61,9 +62,10 @@
 									"pm.test(\"Status code is 200\", function () {",
 									"  pm.response.to.have.status(200);",
 									"});",
-									"pm.test(\"Has user object\", function () {",
-									"  const res = pm.response.json();",
-									"  pm.expect(res).to.have.property('user');",
+                                    "pm.test(\"Has user object\", function () {",
+                                    "  const res = pm.response.json();",
+                                    "  pm.expect(res).to.have.property('data');",
+                                    "  pm.expect(res.data).to.have.property('user');",
 									"});"
 								],
 								"type": "text/javascript"

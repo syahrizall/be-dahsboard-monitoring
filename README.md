@@ -77,14 +77,16 @@ Content-Type: application/json
 Response:
 ```json
 {
-    "status": "success",
-    "message": "Login successful",
+  "status": "success",
+  "message": "Login successful",
+  "data": {
     "user": {
-        "id": 1,
-        "name": "Admin",
-        "email": "admin@polri.com"
+      "id": 1,
+      "name": "Admin",
+      "email": "admin@polri.com"
     },
     "token": "1|abc123..."
+  }
 }
 ```
 

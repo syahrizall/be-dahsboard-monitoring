@@ -20,10 +20,16 @@ class StatsController extends Controller
     {
         try {
             $users = $this->loginLogService->getActiveUsers();
-            return response()->json(['active_users' => $users]);
+            return response()->json([
+                'status' => 'success',
+                'data' => ['active_users' => $users],
+            ]);
         } catch (\Exception $e) {
             Log::error('Error fetching active users', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Failed to fetch active users'], 500);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch active users',
+            ], 500);
         }
     }
 
@@ -31,10 +37,16 @@ class StatsController extends Controller
     {
         try {
             $count = $this->loginLogService->getUniqueUsersCount();
-            return response()->json(['unique_users' => $count]);
+            return response()->json([
+                'status' => 'success',
+                'data' => ['unique_users' => $count],
+            ]);
         } catch (\Exception $e) {
             Log::error('Error fetching unique users', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Failed to fetch unique users'], 500);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch unique users',
+            ], 500);
         }
     }
 
@@ -42,10 +54,16 @@ class StatsController extends Controller
     {
         try {
             $users = $this->loginLogService->getUniqueUsersList();
-            return response()->json($users);
+            return response()->json([
+                'status' => 'success',
+                'data' => $users,
+            ]);
         } catch (\Exception $e) {
             Log::error('Error fetching unique users list', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Failed to fetch unique users list'], 500);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch unique users list',
+            ], 500);
         }
     }
 
@@ -53,10 +71,16 @@ class StatsController extends Controller
     {
         try {
             $data = $this->loginLogService->getLastLoginData();
-            return response()->json($data);
+            return response()->json([
+                'status' => 'success',
+                'data' => $data,
+            ]);
         } catch (\Exception $e) {
             Log::error('Error fetching last login data', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Failed to fetch last login data'], 500);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch last login data',
+            ], 500);
         }
     }
 
@@ -64,10 +88,16 @@ class StatsController extends Controller
     {
         try {
             $count = $this->loginLogService->getSuccessCount();
-            return response()->json(['success_logins' => $count]);
+            return response()->json([
+                'status' => 'success',
+                'data' => ['success_logins' => $count],
+            ]);
         } catch (\Exception $e) {
             Log::error('Error fetching success count', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Failed to fetch success count'], 500);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch success count',
+            ], 500);
         }
     }
 
@@ -75,10 +105,16 @@ class StatsController extends Controller
     {
         try {
             $count = $this->loginLogService->getFailedCount();
-            return response()->json(['failed_logins' => $count]);
+            return response()->json([
+                'status' => 'success',
+                'data' => ['failed_logins' => $count],
+            ]);
         } catch (\Exception $e) {
             Log::error('Error fetching failed count', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Failed to fetch failed count'], 500);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch failed count',
+            ], 500);
         }
     }
 
@@ -94,12 +130,22 @@ class StatsController extends Controller
             $to = $request->input('to');
 
             $data = $this->loginLogService->getLoginsByDate($from, $to);
-            return response()->json($data);
+            return response()->json([
+                'status' => 'success',
+                'data' => $data,
+            ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['error' => 'Invalid date parameters', 'errors' => $e->errors()], 422);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid date parameters',
+                'errors' => $e->errors(),
+            ], 422);
         } catch (\Exception $e) {
             Log::error('Error fetching logins by date', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Failed to fetch logins by date'], 500);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch logins by date',
+            ], 500);
         }
     }
 }
