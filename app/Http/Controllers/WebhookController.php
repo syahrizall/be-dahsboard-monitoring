@@ -22,7 +22,7 @@ class WebhookController extends Controller
             // Validasi data request
             $validated = $request->validate([
                 'username' => 'required|string|max:255',
-                'success' => 'required|boolean',
+                'success' => 'required',
                 'ip_address' => 'nullable|ip',
                 'raw_payload' => 'nullable|array',
             ]);
