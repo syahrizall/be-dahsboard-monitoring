@@ -22,7 +22,7 @@ class WebhookController extends Controller
             // Validasi data request
             $validated = $request->validate([
                 'username' => 'required|string|max:255',
-                'success' => 'required',
+                'success' => 'required|boolean',
                 'ip_address' => 'nullable|ip',
                 'raw_payload' => 'nullable|array',
             ]);
@@ -30,12 +30,10 @@ class WebhookController extends Controller
             // Ambil data dari RADIUS webhook
             $data = $request->all();
 
-            $success = filter_var($data['success'], FILTER_VALIDATE_BOOLEAN);
-
             $loginLog = $this->loginLogService->createLoginLog([
                 'username' => $data['username'] ?? 'unknown',
                 'ip_address' => $data['ip_address'] ?? $request->ip(),
-                'success' => $success ?? false,
+                'success' => $data['success'] ?? false,
                 'raw_payload' => $data,
             ]);
 
