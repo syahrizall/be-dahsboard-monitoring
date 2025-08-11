@@ -14,8 +14,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
 });
 
+// Webhook routes
 Route::post('/webhook', [WebhookController::class, 'receive'])
     ->middleware('rate.limit:30'); // 30 requests per minute for webhook
+
+// PrivacyIDEA specific webhook route
+Route::post('/webhook/privacyidea', [WebhookController::class, 'privacyidea'])
+    ->middleware('rate.limit:30'); // 30 requests per minute for PrivacyIDEA webhook
 
 Route::middleware('auth:sanctum')->prefix('stats')->group(function () {
     Route::get('/active-users', [StatsController::class, 'activeUsers'])

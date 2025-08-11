@@ -314,6 +314,130 @@
 			"description": "Endpoint untuk menerima data login dari sistem RADIUS"
 		},
 		{
+			"name": "PrivacyIDEA Webhook",
+			"item": [
+				{
+					"name": "POST PrivacyIDEA Webhook - Success Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has correct structure\", function () {",
+									"  const response = pm.response.json();",
+									"  pm.expect(response).to.have.property('status');",
+									"  pm.expect(response).to.have.property('message');",
+									"  pm.expect(response).to.have.property('data');",
+									"  pm.expect(response.status).to.eql('success');",
+									"});",
+									"",
+									"pm.test(\"Data contains PrivacyIDEA fields\", function () {",
+									"  const response = pm.response.json();",
+									"  const data = response.data;",
+									"  pm.expect(data).to.have.property('username');",
+									"  pm.expect(data).to.have.property('success');",
+									"  pm.expect(data).to.have.property('realm');",
+									"  pm.expect(data).to.have.property('token_type');",
+									"  pm.expect(data).to.have.property('action');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"john.doe\",\n  \"success\": true,\n  \"client_ip\": \"192.168.1.100\",\n  \"realm\": \"polri.local\",\n  \"resolver\": \"useridresolver\",\n  \"token_type\": \"totp\",\n  \"serial\": \"PI123456789\",\n  \"action\": \"authenticate\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/webhook/privacyidea",
+							"host": ["{{base_url}}"],
+							"path": ["api", "webhook", "privacyidea"]
+						},
+						"description": "Mengirim data login berhasil dari PrivacyIDEA dengan field lengkap"
+					},
+					"response": []
+				},
+				{
+					"name": "POST PrivacyIDEA Webhook - Failed Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": [
+								"pm.test(\"Status code is 201\", function () {",
+								"  pm.response.to.have.status(201);",
+								"});",
+								"",
+								"pm.test(\"Success field is false\", function () {",
+								"  const response = pm.response.json();",
+								"  pm.expect(response.data.success).to.eql(false);",
+								"});"
+							],
+							"type": "text/javascript"
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"john.doe\",\n  \"success\": false,\n  \"client_ip\": \"192.168.1.100\",\n  \"realm\": \"polri.local\",\n  \"token_type\": \"totp\",\n  \"action\": \"authenticate\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/webhook/privacyidea",
+							"host": ["{{base_url}}"],
+							"path": ["api", "webhook", "privacyidea"]
+						},
+						"description": "Mengirim data login gagal dari PrivacyIDEA"
+					},
+					"response": []
+				},
+				{
+					"name": "POST PrivacyIDEA Webhook - Minimal Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": [
+								"pm.test(\"Status code is 201\", function () {",
+								"  pm.response.to.have.status(201);",
+								"});"
+							],
+							"type": "text/javascript"
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"jane.smith\",\n  \"success\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/webhook/privacyidea",
+							"host": ["{{base_url}}"],
+							"path": ["api", "webhook", "privacyidea"]
+						},
+						"description": "Mengirim data minimal dari PrivacyIDEA (hanya username dan success)"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoint khusus untuk menerima data login dari PrivacyIDEA v3.11.4"
+		},
+		{
 			"name": "Statistics",
 			"item": [
 				{

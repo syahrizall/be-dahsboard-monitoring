@@ -10,6 +10,11 @@ class LoginLog extends Model
         'username',
         'ip_address',
         'success',
+        'realm',
+        'resolver',
+        'token_type',
+        'serial',
+        'action',
         'raw_payload',
     ];
     

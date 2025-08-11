@@ -19,38 +19,61 @@ class WebhookController extends Controller
     public function receive(Request $request): JsonResponse
     {
         try {
-            // Validasi data request
+            // Log raw request untuk debugging
+            Log::info('Webhook received', [
+                'headers' => $request->headers->all(),
+                'payload' => $request->all(),
+                'source' => 'privacyidea'
+            ]);
+
+            // Validasi data request untuk PrivacyIDEA
             $validated = $request->validate([
                 'username' => 'required|string|max:255',
                 'success' => 'required|boolean',
-                'ip_address' => 'nullable|ip',
+                'client_ip' => 'nullable|ip',
+                'realm' => 'nullable|string|max:255',
+                'resolver' => 'nullable|string|max:255',
+                'token_type' => 'nullable|string|max:100',
+                'serial' => 'nullable|string|max:100',
+                'action' => 'nullable|string|max:100',
                 'raw_payload' => 'nullable|array',
             ]);
 
-            // Ambil data dari RADIUS webhook
+            // Ambil data dari PrivacyIDEA webhook
             $data = $request->all();
 
-            $loginLog = $this->loginLogService->createLoginLog([
+            // Mapping field PrivacyIDEA ke field internal
+            $loginLogData = [
                 'username' => $data['username'] ?? 'unknown',
-                'ip_address' => $data['ip_address'] ?? $request->ip(),
+                'ip_address' => $data['client_ip'] ?? $request->ip(), // PrivacyIDEA menggunakan client_ip
                 'success' => $data['success'] ?? false,
+                'realm' => $data['realm'] ?? null,
+                'resolver' => $data['resolver'] ?? null,
+                'token_type' => $data['token_type'] ?? null,
+                'serial' => $data['serial'] ?? null,
+                'action' => $data['action'] ?? null,
                 'raw_payload' => $data,
-            ]);
+            ];
 
-            Log::info('Login log created', [
+            $loginLog = $this->loginLogService->createLoginLog($loginLogData);
+
+            Log::info('PrivacyIDEA login log created', [
                 'username' => $loginLog->username,
                 'success' => $loginLog->success,
                 'ip_address' => $loginLog->ip_address,
+                'realm' => $loginLog->realm,
+                'token_type' => $loginLog->token_type,
+                'action' => $loginLog->action,
             ]);
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Login log created successfully',
+                'message' => 'PrivacyIDEA login log created successfully',
                 'data' => $loginLog,
             ], 201);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::warning('Webhook validation failed', [
+            Log::warning('PrivacyIDEA webhook validation failed', [
                 'errors' => $e->errors(),
                 'payload' => $request->all(),
             ]);
@@ -62,7 +85,7 @@ class WebhookController extends Controller
             ], 422);
 
         } catch (\Exception $e) {
-            Log::error('Webhook processing failed', [
+            Log::error('PrivacyIDEA webhook processing failed', [
                 'error' => $e->getMessage(),
                 'payload' => $request->all(),
             ]);
@@ -72,5 +95,13 @@ class WebhookController extends Controller
                 'message' => 'Internal server error',
             ], 500);
         }
+    }
+
+    /**
+     * Endpoint khusus untuk PrivacyIDEA webhook
+     */
+    public function privacyidea(Request $request): JsonResponse
+    {
+        return $this->receive($request);
     }
 }
