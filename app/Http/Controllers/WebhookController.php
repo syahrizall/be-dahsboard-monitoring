@@ -18,11 +18,6 @@ class WebhookController extends Controller
 
     public function receive(Request $request): JsonResponse
     {
-        Log::info('Webhook received', [
-            'headers' => $request->headers->all(),
-            'payload' => $request->all(),
-            'source' => 'privacyidea'
-        ]);
         try {
             // Log raw request untuk debugging
             Log::info('Webhook received', [
