@@ -1,13 +1,31 @@
 <?php
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\WebhookController;
-use App\Http\Controllers\AuthController;
 
 // Authentication routes
 Route::post('/login', [AuthController::class, 'login']);
 
+
+Route::post('/webhook-debug', function (Request $request) {
+    // Mencatat semua data dari body request
+    Log::info('Webhook Data:', $request->all());
+
+    // Opsional: Mencatat semua header request
+    Log::info('Webhook Headers:', $request->headers->all());
+
+    // Mengembalikan respons sukses agar webhook tidak gagal
+    return response()->json([
+        'status' => 'Data diterima dan dicatat.',
+        'message' => 'Webhook berhasil dikirim.',
+        'data' => $request->all(),
+        'headers' => $request->headers->all()
+    ]);
+});
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
