@@ -70,7 +70,7 @@ class WebhookController extends Controller
                 'status' => 'success',
                 'message' => 'PrivacyIDEA login log created successfully',
                 'data' => $loginLog,
-            ], 201);
+            ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::warning('PrivacyIDEA webhook validation failed', [
